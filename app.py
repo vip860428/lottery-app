@@ -136,10 +136,10 @@ if file_m and file_s:
             # 間隔約 2 行寬
             st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
             
-            # 提供 Excel 下載按鈕
+            # 提供 Excel 下載按鈕 (已修正 sheet_name 參數)
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df_final.to_excel(writer, index=False, sheet_sheet="Sheet1" if hasattr(writer, 'sheet_sheet') else "Sheet1")
+                df_final.to_excel(writer, index=False, sheet_name="Sheet1")
             excel_data = output.getvalue()
             
             st.download_button(
