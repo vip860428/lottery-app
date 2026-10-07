@@ -71,6 +71,17 @@ def clean_val(val):
         return m.group(1)
     return val_str
 
+# 數值轉整數格式函數 (去除小數點)
+def to_int_str(val):
+    if pd.isna(val) or val == "":
+        return ""
+    try:
+        # 先轉浮點數再四捨五入轉整數
+        num = float(val)
+        return int(round(num))
+    except (ValueError, TypeError):
+        return str(val)
+
 # 讀取 Excel/HTML 工具函數
 def load_data(uploaded_file):
     if uploaded_file is None:
@@ -129,14 +140,20 @@ if file_m and file_s:
                 if col not in df_merged.columns:
                     df_merged[col] = ""
             
-            df_final = df_merged[target_columns]
+            df_final = df_merged[target_columns].copy()
+            
+            # 數值欄位去除小數點處理 (包含 L 欄：DP值小計)
+            int_columns = ['數量', '單價', 'DP', '金額小計', 'DP值小計']
+            for col in int_columns:
+                if col in df_final.columns:
+                    df_final[col] = df_final[col].apply(to_int_str)
             
             st.success(f"🎉 資料比對成功！共處理 {len(df_final)} 筆記錄。")
             
             # 間隔約 2 行寬
             st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
             
-            # 提供 Excel 下載按鈕 (已修正 sheet_name 參數)
+            # 提供 Excel 下載按鈕
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df_final.to_excel(writer, index=False, sheet_name="Sheet1")
